@@ -1,5 +1,6 @@
 #include <highgui.h>
-
+#include <cv.hpp>
+#include <opencv2/core/core.hpp>
 #include <ros/ros.h>
 #include <ros/console.h>
 #include <std_msgs/String.h>

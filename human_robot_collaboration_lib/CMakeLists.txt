@@ -23,6 +23,7 @@ find_package(catkin REQUIRED COMPONENTS
              cmake_modules
              aruco
              aruco_ros
+             aruco_msgs
              human_robot_collaboration_msgs
              baxter_core_msgs
              cv_bridge
@@ -35,8 +36,8 @@ find_package(catkin REQUIRED COMPONENTS
              trac_ik_lib
              )
 
-find_package(OpenCV 2.4 REQUIRED)
-find_package(Eigen      REQUIRED)
+find_package(OpenCV 3.3 REQUIRED)
+find_package(Eigen3     REQUIRED)
 
 ###################################
 ## catkin specific configuration ##
@@ -50,7 +51,7 @@ find_package(Eigen      REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES robot_utils robot_interface robot_perception
-  DEPENDS Eigen trac_ik_lib aruco_ros aruco
+  DEPENDS Eigen trac_ik_lib aruco_ros aruco aruco_msgs
 )
 
 ###########
