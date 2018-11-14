@@ -21,6 +21,7 @@
 #include <kdl/chainiksolverpos_nr_jl.hpp>
 #include <sensor_msgs/JointState.h>
 #include <baxter_core_msgs/SolvePositionIK.h>
+#include <intera_core_msgs/SolvePositionIK.h>
 
 class baxterTracIK
 {
@@ -44,6 +45,7 @@ public:
     KDL::JntArray JointState2JntArray(const sensor_msgs::JointState &js);
 
     bool perform_ik(baxter_core_msgs::SolvePositionIK &ik_srv);
+    bool perform_ik(intera_core_msgs::SolvePositionIK &ik_srv);
 
     bool getKDLLimits(KDL::JntArray &ll, KDL::JntArray &ul);
     bool setKDLLimits(KDL::JntArray  ll, KDL::JntArray  ul);

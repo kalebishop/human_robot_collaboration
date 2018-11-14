@@ -150,6 +150,60 @@ bool baxterTracIK::perform_ik(baxter_core_msgs::SolvePositionIK &ik_srv)
     return true;
 }
 
+bool baxterTracIK::perform_ik(intera_core_msgs::SolvePositionIK &ik_srv)
+{
+    int rc = -1;
+    KDL::JntArray result;
+    sensor_msgs::JointState joint_state;
+
+    for(size_t i=0; i<_chain.getNrOfSegments(); ++i)
+    {
+        KDL::Joint joint = _chain.getSegment(i).getJoint();
+        if(joint.getType()!=KDL::Joint::None)
+        {
+            joint_state.name.push_back(joint.getName());
+        }
+    }
+
+    bool seeds_provided = ik_srv.request.seed_angles[0].name.size() == joint_state.name.size();
+
+    joint_state.position.clear();
+    KDL::Frame ee_pose(KDL::Rotation::Quaternion(ik_srv.request.pose_stamp[0].pose.orientation.x,
+                                                 ik_srv.request.pose_stamp[0].pose.orientation.y,
+                                                 ik_srv.request.pose_stamp[0].pose.orientation.z,
+                                                 ik_srv.request.pose_stamp[0].pose.orientation.w),
+                       KDL::Vector(ik_srv.request.pose_stamp[0].pose.position.x,
+                                   ik_srv.request.pose_stamp[0].pose.position.y,
+                                   ik_srv.request.pose_stamp[0].pose.position.z));
+
+    KDL::JntArray seed(_chain.getNrOfJoints());
+
+    if(seeds_provided)   seed = JointState2JntArray(ik_srv.request.seed_angles[0]);
+
+    for(int num_attempts=0; num_attempts<_num_steps; ++num_attempts)
+    {
+        if (num_attempts>0)
+        {
+            ROS_DEBUG("Attempt num %i with tolerance %g", num_attempts, _eps);
+        }
+
+        rc = _tracik_solver->CartToJnt(seeds_provided? seed: *(_nominal), ee_pose, result);
+
+        // computeFwdKin(result);
+        if(rc>=0) break;
+    }
+
+    for(size_t j=0; j<_chain.getNrOfJoints(); ++j)
+    {
+        joint_state.position.push_back(result(j));
+    }
+
+    ik_srv.response.joints.push_back(joint_state);
+    ik_srv.response.result_type.push_back(rc>=0);
+
+    return true;
+}
+
 #include <iostream>
 #include <kdl/chainfksolver.hpp>
 #include <kdl/chainfksolverpos_recursive.hpp>

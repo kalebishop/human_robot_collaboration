@@ -34,6 +34,8 @@ find_package(catkin REQUIRED COMPONENTS
                 # I found to avoid the undefined reference error to ros::init.
                 # See http://goo.gl/GlbKgM
              trac_ik_lib
+             intera_core_msgs
+             intera_motion_msgs
              )
 
 find_package(OpenCV 3.3 REQUIRED)

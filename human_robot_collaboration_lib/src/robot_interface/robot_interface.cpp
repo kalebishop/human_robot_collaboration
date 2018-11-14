@@ -4,7 +4,7 @@
 
 using namespace              std;
 using namespace            Eigen;
-using namespace baxter_core_msgs;
+using namespace intera_core_msgs;
 
 /**************************************************************************/
 /*                         RobotInterface                                 */
@@ -398,7 +398,7 @@ bool RobotInterface::isCtrlRunning()
     return res;
 }
 
-void RobotInterface::collAvCb(const baxter_core_msgs::CollisionAvoidanceState& _msg)
+void RobotInterface::collAvCb(const intera_core_msgs::CollisionAvoidanceState& _msg)
 {
     if (_msg.collision_object.size()!=0)
     {
@@ -419,7 +419,7 @@ void RobotInterface::collAvCb(const baxter_core_msgs::CollisionAvoidanceState& _
     return;
 }
 
-void RobotInterface::collDetCb(const baxter_core_msgs::CollisionDetectionState& _msg)
+void RobotInterface::collDetCb(const intera_core_msgs::CollisionDetectionState& _msg)
 {
     if (_msg.collision_state==true)
     {
@@ -469,9 +469,9 @@ void RobotInterface::jointStatesCb(const sensor_msgs::JointState& _msg)
     return;
 }
 
-void RobotInterface::cuffLowerCb(const baxter_core_msgs::DigitalIOState& _msg)
+void RobotInterface::cuffLowerCb(const intera_core_msgs::DigitalIOState& _msg)
 {
-    if (_msg.state == baxter_core_msgs::DigitalIOState::PRESSED)
+    if (_msg.state == intera_core_msgs::DigitalIOState::PRESSED)
     {
         // This if is placed because we couldn't have a ROS_INFO_COND_THROTTLE
         if (print_level >= 2)
@@ -485,9 +485,9 @@ void RobotInterface::cuffLowerCb(const baxter_core_msgs::DigitalIOState& _msg)
     return;
 }
 
-void RobotInterface::cuffUpperCb(const baxter_core_msgs::DigitalIOState& _msg)
+void RobotInterface::cuffUpperCb(const intera_core_msgs::DigitalIOState& _msg)
 {
-    if (_msg.state == baxter_core_msgs::DigitalIOState::PRESSED)
+    if (_msg.state == intera_core_msgs::DigitalIOState::PRESSED)
     {
         // This if is placed because we couldn't have a ROS_INFO_COND_THROTTLE
         if (print_level >= 2)
@@ -501,7 +501,7 @@ void RobotInterface::cuffUpperCb(const baxter_core_msgs::DigitalIOState& _msg)
     return;
 }
 
-void RobotInterface::endpointCb(const baxter_core_msgs::EndpointState& _msg)
+void RobotInterface::endpointCb(const intera_core_msgs::EndpointState& _msg)
 {
     ROS_INFO_COND(print_level>=12, "endpointCb");
     curr_pos = _msg.pose.position;
@@ -606,9 +606,12 @@ bool RobotInterface::goToJointConfNoCheck(VectorXd joint_values)
 
     setJointNames(joint_cmd);
 
-    for (int i = 0; i < joint_values.size(); ++i)
+    if (joint_cmd.mode == human_robot_collaboration_msgs::GoToPose::POSITION_MODE)
     {
-        joint_cmd.command.push_back(joint_values[i]);
+        for (int i = 0; i < joint_values.size(); ++i)
+        {
+            joint_cmd.position.push_back(joint_values[i]);
+        }
     }
 
     publishJointCmd(joint_cmd);
@@ -702,7 +705,7 @@ bool RobotInterface::computeIK(double px, double py, double pz,
                 ROS_WARN_ONCE("\t\t\tTime elapsed in computing IK: %g",te);
             }
 
-            if (ik_srv.response.isValid[0])
+            if (ik_srv.response.result_type[0])
             {
                 ROS_INFO_COND(print_level>=6, "Got solution!");
 
@@ -880,7 +883,7 @@ bool RobotInterface::isConfigurationReached(VectorXd _dj, string _mode)
 {
     if (_dj.size() < 7) { return false; }
 
-    baxter_core_msgs::JointCommand des_jnts;
+    intera_core_msgs::JointCommand des_jnts;
     setJointNames(des_jnts);
     setJointCommands(_dj[0], _dj[1], _dj[2],
                      _dj[3], _dj[4], _dj[5], _dj[6], des_jnts);
@@ -888,7 +891,7 @@ bool RobotInterface::isConfigurationReached(VectorXd _dj, string _mode)
     return isConfigurationReached(des_jnts, _mode);
 }
 
-bool RobotInterface::isConfigurationReached(baxter_core_msgs::JointCommand _dj, string _mode)
+bool RobotInterface::isConfigurationReached(intera_core_msgs::JointCommand _dj, string _mode)
 {
     sensor_msgs::JointState cj = getJointStates();
 
@@ -899,8 +902,8 @@ bool RobotInterface::isConfigurationReached(baxter_core_msgs::JointCommand _dj, 
                                                                             getLimb().c_str(),
                                cj.position[0], cj.position[1], cj.position[2], cj.position[3],
                                                cj.position[4], cj.position[5], cj.position[6],
-                               _dj.command[0], _dj.command[1], _dj.command[2], _dj.command[3],
-                                               _dj.command[4], _dj.command[5], _dj.command[6]);
+                               _dj.position[0], _dj.position[1], _dj.position[2], _dj.position[3],
+                                                _dj.position[4], _dj.position[5], _dj.position[6]);
 
     for (size_t i = 0; i < _dj.names.size(); ++i)
     {
@@ -912,12 +915,12 @@ bool RobotInterface::isConfigurationReached(baxter_core_msgs::JointCommand _dj, 
                 if (_mode == "strict")
                 {
                     // It's approximatively half a degree
-                    if (abs(_dj.command[i]-cj.position[j]) > 0.010) return false;
+                    if (abs(_dj.position[i]-cj.position[j]) > 0.010) return false;
                 }
                 else if (_mode == "loose")
                 {
                     // It's approximatively a degree
-                    if (abs(_dj.command[i]-cj.position[j]) > 0.020) return false;
+                    if (abs(_dj.position[i]-cj.position[j]) > 0.020) return false;
                 }
                 res = true;
             }
@@ -962,15 +965,15 @@ void RobotInterface::setJointNames(JointCommand& joint_cmd)
 
 void RobotInterface::setJointCommands(double s0, double s1, double e0, double e1,
                                                  double w0, double w1, double w2,
-                                      baxter_core_msgs::JointCommand& joint_cmd)
+                                      intera_core_msgs::JointCommand& joint_cmd)
 {
-    joint_cmd.command.push_back(s0);
-    joint_cmd.command.push_back(s1);
-    joint_cmd.command.push_back(e0);
-    joint_cmd.command.push_back(e1);
-    joint_cmd.command.push_back(w0);
-    joint_cmd.command.push_back(w1);
-    joint_cmd.command.push_back(w2);
+    joint_cmd.position.push_back(s0);
+    joint_cmd.position.push_back(s1);
+    joint_cmd.position.push_back(e0);
+    joint_cmd.position.push_back(e1);
+    joint_cmd.position.push_back(w0);
+    joint_cmd.position.push_back(w1);
+    joint_cmd.position.push_back(w2);
 }
 
 double RobotInterface::relativeDiff(double a, double b)
@@ -1096,7 +1099,7 @@ bool RobotInterface::publishState()
     return true;
 }
 
-void RobotInterface::publishJointCmd(baxter_core_msgs::JointCommand _cmd)
+void RobotInterface::publishJointCmd(intera_core_msgs::JointCommand _cmd)
 {
     // cout << "Joint Command: " << _cmd << endl;
     joint_cmd_pub.publish(_cmd);

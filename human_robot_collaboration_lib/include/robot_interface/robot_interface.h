@@ -29,6 +29,14 @@
 #include <baxter_core_msgs/JointCommand.h>
 #include <baxter_core_msgs/SolvePositionIK.h>
 
+// sawyer core msgs
+#include <intera_core_msgs/DigitalIOState.h>
+#include <intera_core_msgs/EndpointState.h>
+#include <intera_core_msgs/CollisionAvoidanceState.h>
+#include <intera_core_msgs/CollisionDetectionState.h>
+#include <intera_core_msgs/JointCommand.h>
+#include <intera_core_msgs/SolvePositionIK.h>
+
 #include <geometry_msgs/Point.h>
 #include <sensor_msgs/Range.h>
 #include <std_msgs/Empty.h>
@@ -192,7 +200,7 @@ private:
      *
      * @param _cmd The desired joint configuration
      */
-    void publishJointCmd(baxter_core_msgs::JointCommand _cmd);
+    void publishJointCmd(intera_core_msgs::JointCommand _cmd);
 
     /*
      * Callback function that sets the current pose to the pose received from
@@ -200,7 +208,7 @@ private:
      *
      * @param _msg the topic message
      */
-    void endpointCb(const baxter_core_msgs::EndpointState& _msg);
+    void endpointCb(const intera_core_msgs::EndpointState& _msg);
 
     /**
      * Callback for the joint states. Used to seed the
@@ -218,7 +226,7 @@ private:
      *
      * @param _msg the topic message
      */
-    void collAvCb(const baxter_core_msgs::CollisionAvoidanceState& _msg);
+    void collAvCb(const intera_core_msgs::CollisionAvoidanceState& _msg);
 
     /**
      * Callback for the collision detection state. Used to detect
@@ -228,7 +236,7 @@ private:
      *
      * @param _msg the topic message
      */
-    void collDetCb(const baxter_core_msgs::CollisionDetectionState& _msg);
+    void collDetCb(const intera_core_msgs::CollisionDetectionState& _msg);
 
     /*
      * Infrared sensor callback function that sets the current range to the range received
@@ -276,7 +284,7 @@ protected:
      *
      * @param _msg the topic message
      */
-    virtual void cuffLowerCb(const baxter_core_msgs::DigitalIOState& _msg);
+    virtual void cuffLowerCb(const intera_core_msgs::DigitalIOState& _msg);
 
     /*
      * Callback function for the upper (oval) CUFF OK button.
@@ -285,7 +293,7 @@ protected:
      *
      * @param _msg the topic message
      */
-    virtual void cuffUpperCb(const baxter_core_msgs::DigitalIOState& _msg);
+    virtual void cuffUpperCb(const intera_core_msgs::DigitalIOState& _msg);
 
     /*
      * Checks if end effector has made contact with a token by checking if
@@ -406,7 +414,7 @@ protected:
      * @param  _mode   (strict/loose) the desired level of precision
      * @return         true/false if success/failure
      */
-    bool isConfigurationReached(baxter_core_msgs::JointCommand _dj, std::string _mode = "loose");
+    bool isConfigurationReached(intera_core_msgs::JointCommand _dj, std::string _mode = "loose");
 
     /*
      * Uses IK solver to find joint angles solution for desired pose
@@ -492,7 +500,7 @@ protected:
      *
      * @param    joint_cmd the joint command
      */
-    void setJointNames(baxter_core_msgs::JointCommand& joint_cmd);
+    void setJointNames(intera_core_msgs::JointCommand& joint_cmd);
 
     /*
      * Sets the joint commands of a JointCommand
@@ -508,7 +516,7 @@ protected:
      */
     void setJointCommands(double s0, double s1, double e0, double e1,
                                      double w0, double w1, double w2,
-                          baxter_core_msgs::JointCommand& joint_cmd);
+                          intera_core_msgs::JointCommand& joint_cmd);
 
     /*
      * Finds the relative difference of a to b (used in force filter calculations)

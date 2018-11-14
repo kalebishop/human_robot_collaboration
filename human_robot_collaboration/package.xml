@@ -39,6 +39,7 @@
   <depend>rosconsole</depend>
   <depend>ros_speech2text</depend>
   <depend>svox_tts</depend>
+  <depend>intera_core_msgs</depend>
 
   <test_depend>baxter_description</test_depend>
 

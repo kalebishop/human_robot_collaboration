@@ -43,6 +43,8 @@
   <depend>image_transport</depend>
   <depend>rosconsole</depend>
   <depend>trac_ik_lib</depend>
+  <depend>intera_core_msgs</depend>
+  <depend>intera_motion_msgs</depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
