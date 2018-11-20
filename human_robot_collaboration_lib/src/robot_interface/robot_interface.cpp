@@ -9,10 +9,10 @@ using namespace intera_core_msgs;
 /**************************************************************************/
 /*                         RobotInterface                                 */
 /**************************************************************************/
-RobotInterface::RobotInterface(string _name, string _limb, bool _use_robot, double _ctrl_freq, bool _use_forces,
-                               bool _use_trac_ik, bool _use_cart_ctrl, bool _is_experimental) : nh(_name), name(_name),
-                               limb(_limb), state(START), spinner(8), use_robot(_use_robot), use_forces(_use_forces),
-                               ir_ok(false), curr_range(0.0), curr_min_range(0.0), curr_max_range(0.0),
+RobotInterface::RobotInterface(string _name, string _limb, bool _use_robot, bool _use_simulator, double _ctrl_freq,
+                               bool _use_forces, bool _use_trac_ik, bool _use_cart_ctrl, bool _is_experimental) :
+                               nh(_name), name(_name), limb(_limb), state(START), spinner(8), use_robot(_use_robot), use_simulator(_use_simulator),
+                               use_forces(_use_forces), ir_ok(false), curr_range(0.0), curr_min_range(0.0), curr_max_range(0.0),
                                ik_solver(_limb, _use_robot), use_trac_ik(_use_trac_ik), ctrl_freq(_ctrl_freq),
                                filt_force(0.0, 0.0, 0.0), filt_change(0.0, 0.0, 0.0), time_filt_last_updated(ros::Time::now()),
                                is_coll_av_on(false), is_coll_det_on(false), is_closing(false), use_cart_ctrl(_use_cart_ctrl),
@@ -62,11 +62,14 @@ RobotInterface::RobotInterface(string _name, string _limb, bool _use_robot, doub
     jntstate_sub   = nh.subscribe("/robot/joint_states",
                                    SUBSCRIBER_BUFFER, &RobotInterface::jointStatesCb, this);
 
-    coll_av_sub    = nh.subscribe("/robot/limb/" + getLimb() + "/collision_avoidance_state",
-                                   SUBSCRIBER_BUFFER, &RobotInterface::collAvCb, this);
+    if (_use_simulator == false)
+    {
+        coll_av_sub    = nh.subscribe("/robot/limb/" + getLimb() + "/collision_avoidance_state",
+                                       SUBSCRIBER_BUFFER, &RobotInterface::collAvCb, this);
 
-    coll_det_sub   = nh.subscribe("/robot/limb/" + getLimb() + "/collision_detection_state",
-                                   SUBSCRIBER_BUFFER, &RobotInterface::collDetCb, this);
+        coll_det_sub   = nh.subscribe("/robot/limb/" + getLimb() + "/collision_detection_state",
+                                       SUBSCRIBER_BUFFER, &RobotInterface::collDetCb, this);
+    }
 
     std::string topic = "/"+getName()+"/"+getLimb()+"/state";
     state_pub = nh.advertise<human_robot_collaboration_msgs::ArmState>(topic, SUBSCRIBER_BUFFER, true);
@@ -954,13 +957,13 @@ bool RobotInterface::setCtrlType(const std::string &_ctrl_type)
 
 void RobotInterface::setJointNames(JointCommand& joint_cmd)
 {
-    joint_cmd.names.push_back(getLimb() + "_s0");
-    joint_cmd.names.push_back(getLimb() + "_s1");
-    joint_cmd.names.push_back(getLimb() + "_e0");
-    joint_cmd.names.push_back(getLimb() + "_e1");
-    joint_cmd.names.push_back(getLimb() + "_w0");
-    joint_cmd.names.push_back(getLimb() + "_w1");
-    joint_cmd.names.push_back(getLimb() + "_w2");
+    joint_cmd.names.push_back(getLimb() + "_j0");
+    joint_cmd.names.push_back(getLimb() + "_j1");
+    joint_cmd.names.push_back(getLimb() + "_j2");
+    joint_cmd.names.push_back(getLimb() + "_j3");
+    joint_cmd.names.push_back(getLimb() + "_j4");
+    joint_cmd.names.push_back(getLimb() + "_j5");
+    joint_cmd.names.push_back(getLimb() + "_j6");
 }
 
 void RobotInterface::setJointCommands(double s0, double s1, double e0, double e1,

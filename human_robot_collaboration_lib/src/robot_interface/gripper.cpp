@@ -13,15 +13,15 @@ Gripper::Gripper(std::string _limb, bool _use_robot) :
     gnh.param<int> ("/print_level", g_print_level, 0);
 
     // create a publisher for the gripper's commands
-    pub_cmd = gnh.advertise<EndEffectorCommand>( "/robot/end_effector/" +
+    pub_cmd = gnh.advertise<EndEffectorCommand>( "/io/end_effector/" +
                                                 _limb + "_gripper/command", 1);
 
     // create a subscriber to the gripper's properties
-    sub_prop  = gnh.subscribe("/robot/end_effector/" + _limb + "_gripper/properties",
+    sub_prop  = gnh.subscribe("/io/end_effector/" + _limb + "_gripper/config",
                                    SUBSCRIBER_BUFFER, &Gripper::gripperPropCb, this);
 
     // create a subscriber to the gripper's state
-    sub_state = gnh.subscribe("/robot/end_effector/" + _limb + "_gripper/state",
+    sub_state = gnh.subscribe("/io/end_effector/" + _limb + "_gripper/state",
                                   SUBSCRIBER_BUFFER, &Gripper::gripperCb, this);
 
     //Initially all the interesting properties of the state are unknown

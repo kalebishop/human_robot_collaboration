@@ -108,7 +108,7 @@ TEST(RobotInterfaceTest, testJointStatesCb)
     sensor_msgs::JointState msg;
 
     // Set random values for JointState name, position, and velocity fields
-    msg.name = {"_s0", "_s1", "_e0", "_e1", "_w0", "_w1", "_w2"};
+    msg.name = {"_j0", "_j1", "_j2", "_j3", "_j4", "_j5", "_j6"};
 
     for(size_t i = 0; i < msg.name.size(); ++i)
     {
@@ -131,13 +131,13 @@ TEST(RobotInterfaceTest, testJointStatesCb)
 
     // Check that the JointState message has been correctly parsed
     // by the robot interface
-    EXPECT_EQ(ri.getJointStates().name[0], ri.getLimb() + "_s0");
-    EXPECT_EQ(ri.getJointStates().name[1], ri.getLimb() + "_s1");
-    EXPECT_EQ(ri.getJointStates().name[2], ri.getLimb() + "_e0");
-    EXPECT_EQ(ri.getJointStates().name[3], ri.getLimb() + "_e1");
-    EXPECT_EQ(ri.getJointStates().name[4], ri.getLimb() + "_w0");
-    EXPECT_EQ(ri.getJointStates().name[5], ri.getLimb() + "_w1");
-    EXPECT_EQ(ri.getJointStates().name[6], ri.getLimb() + "_w2");
+    EXPECT_EQ(ri.getJointStates().name[0], ri.getLimb() + "_j0");
+    EXPECT_EQ(ri.getJointStates().name[1], ri.getLimb() + "_j1");
+    EXPECT_EQ(ri.getJointStates().name[2], ri.getLimb() + "_j2");
+    EXPECT_EQ(ri.getJointStates().name[3], ri.getLimb() + "_j3");
+    EXPECT_EQ(ri.getJointStates().name[4], ri.getLimb() + "_j4");
+    EXPECT_EQ(ri.getJointStates().name[5], ri.getLimb() + "_j5");
+    EXPECT_EQ(ri.getJointStates().name[6], ri.getLimb() + "_j6");
 
     EXPECT_EQ(ri.getJointStates().position, msg.position);
     EXPECT_EQ(ri.getJointStates().velocity, msg.velocity);

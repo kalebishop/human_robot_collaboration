@@ -23,6 +23,10 @@
 #include <baxter_core_msgs/EndEffectorCommand.h>
 #include <baxter_core_msgs/EndEffectorProperties.h>
 
+#include <intera_core_msgs/IODeviceStatus.h>
+#include <intera_core_msgs/IODeviceConfiguration.h>
+#include <intera_core_msgs/IOComponentCommand.h>
+
 #include "robot_utils/utils.h"
 
 class Gripper

@@ -31,3 +31,4 @@
 # Compiled python
 *.pyc
 .vscode/c_cpp_properties.json
+.vscode/settings.json

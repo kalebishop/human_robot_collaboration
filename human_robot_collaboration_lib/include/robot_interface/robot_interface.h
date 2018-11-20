@@ -66,6 +66,7 @@ private:
     ros::AsyncSpinner spinner; // AsyncSpinner to handle callbacks
 
     bool      use_robot;       // Flag to know if we're going to use the robot or not
+    bool  use_simulator;       // Flag to know if we're going to use the simulator or not
     bool     use_forces;       // Flag to know if we're going to use the force feedback
 
     ros::Publisher  joint_cmd_pub; // Publisher to control the robot in joint space
@@ -599,9 +600,10 @@ protected:
 
 public:
     RobotInterface(std::string          _name, std::string                   _limb,
-                   bool     _use_robot = true, double     _ctrl_freq = THREAD_FREQ,
-                   bool    _use_forces = true, bool     _use_trac_ik =        true,
-                   bool _use_cart_ctrl = true, bool _is_experimental =       false);
+                   bool     _use_robot = true, bool         _use_simulator = false,
+                   double _ctrl_freq = THREAD_FREQ, bool        _use_forces = true,
+                   bool   _use_trac_ik = true, bool          _use_cart_ctrl = true,
+                   bool _is_experimental =       false);
 
     ~RobotInterface();
 
