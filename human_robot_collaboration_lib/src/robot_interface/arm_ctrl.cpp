@@ -2,7 +2,7 @@
 
 using namespace std;
 using namespace geometry_msgs;
-using namespace baxter_core_msgs;
+using namespace intera_core_msgs;
 
 ArmCtrl::ArmCtrl(string _name, string _limb, bool _use_robot,
                  bool _use_forces, bool _use_trac_ik, bool _use_cart_ctrl) :
@@ -25,6 +25,7 @@ ArmCtrl::ArmCtrl(string _name, string _limb, bool _use_robot,
     insertAction(ACTION_HOME,    &ArmCtrl::goHome);
     insertAction(ACTION_RELEASE, &ArmCtrl::openImpl);
     insertAction(ACTION_HOLD,    &ArmCtrl::holdObject);
+    insertAction(ACTION_TEST_GRIPPER, &ArmCtrl::testGripper);
 
     nh.param<bool>("internal_recovery",  internal_recovery, true);
     ROS_INFO("[%s] Internal_recovery flag set to %s", getLimb().c_str(),
@@ -71,7 +72,7 @@ void ArmCtrl::InternalThreadEntry()
         ros::Duration(2.0).sleep();
         setState(DONE);
     }
-    else if (a == ACTION_HOME || a == ACTION_RELEASE)
+    else if (a == ACTION_HOME || a == ACTION_RELEASE || a == ACTION_TEST_GRIPPER)
     {
         if (doAction(s, a))  { setState(DONE); }
     }
@@ -156,7 +157,7 @@ bool ArmCtrl::serviceCb(human_robot_collaboration_msgs::DoAction::Request  &req,
 
     setAction(action);
 
-    if (action != ACTION_HOME && action != ACTION_RELEASE && action != ACTION_HOLD &&
+    if (action != ACTION_HOME && action != ACTION_RELEASE && action != ACTION_HOLD && action != ACTION_TEST_GRIPPER &&
         action != std::string(ACTION_HOLD) + "_leg" &&
         action != std::string(ACTION_HOLD) + "_top" &&
         action != "start_" + std::string(ACTION_HOLD) &&
@@ -809,6 +810,20 @@ bool ArmCtrl::goHome()
     bool res = homePoseStrict();
     open();
     return res;
+}
+
+bool ArmCtrl::testGripper()
+{
+    if (!is_calibrated())
+    {
+        ROS_INFO("Gripper is not calibrated. Start calibrating.");
+        calibrate();
+    }
+    if (!open(true, 1.0)) return false;
+    ros::Duration(1.0).sleep();
+    if (!close(true, 1.0)) return false;
+    ros::Duration(1.0).sleep();
+    return true;
 }
 
 bool ArmCtrl::cleanUpObject()

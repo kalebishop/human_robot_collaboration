@@ -59,6 +59,7 @@ enum {
 #define ACTION_HOLD         "hold"
 #define ACTION_START_HOLD   "start_hold"
 #define ACTION_END_HOLD     "end_hold"
+#define ACTION_TEST_GRIPPER "test_gripper"
 // Protected action keys used for things that are not real actions
 #define LIST_ACTIONS        human_robot_collaboration_msgs::DoAction::Request::LIST_ACTIONS
 #define LIST_OBJECTS        human_robot_collaboration_msgs::DoAction::Request::LIST_OBJECTS

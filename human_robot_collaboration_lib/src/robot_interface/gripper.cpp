@@ -1,7 +1,7 @@
 #include "robot_interface/gripper.h"
 
 using namespace              std;
-using namespace baxter_core_msgs;
+using namespace intera_core_msgs;
 
 Gripper::Gripper(std::string _limb, bool _use_robot) :
                  gnh(_limb), limb(_limb), use_robot(_use_robot),
@@ -13,7 +13,7 @@ Gripper::Gripper(std::string _limb, bool _use_robot) :
     gnh.param<int> ("/print_level", g_print_level, 0);
 
     // create a publisher for the gripper's commands
-    pub_cmd = gnh.advertise<EndEffectorCommand>( "/io/end_effector/" +
+    pub_cmd = gnh.advertise<IOComponentCommand>( "/io/end_effector/" +
                                                 _limb + "_gripper/command", 1);
 
     // create a subscriber to the gripper's properties
@@ -25,14 +25,8 @@ Gripper::Gripper(std::string _limb, bool _use_robot) :
                                   SUBSCRIBER_BUFFER, &Gripper::gripperCb, this);
 
     //Initially all the interesting properties of the state are unknown
-    EndEffectorState init_state;
-    init_state.calibrated = EndEffectorState::STATE_UNKNOWN;
-    init_state.enabled    = EndEffectorState::STATE_UNKNOWN;
-    init_state.error      = EndEffectorState::STATE_UNKNOWN;
-    init_state.gripping   = EndEffectorState::STATE_UNKNOWN;
-    init_state.missed     = EndEffectorState::STATE_UNKNOWN;
-    init_state.ready      = EndEffectorState::STATE_UNKNOWN;
-    init_state.moving     = EndEffectorState::STATE_UNKNOWN;
+    IODeviceStatus init_state;
+    init_state.device.name = _limb + "_gripper";
 
     setGripperState(init_state);
 
@@ -42,34 +36,34 @@ Gripper::Gripper(std::string _limb, bool _use_robot) :
     ros::Duration(0.5).sleep();
 
     // set the gripper parameters to their defaults
-    setParameters("", true);
+    // setParameters("", true);
 }
 
-void Gripper::setGripperState(const baxter_core_msgs::EndEffectorState& _state)
+void Gripper::setGripperState(const intera_core_msgs::IODeviceStatus& _state)
 {
     std::lock_guard<std::mutex> lock(mutex_state);
     state = _state;
 }
 
-baxter_core_msgs::EndEffectorState Gripper::getGripperState()
+intera_core_msgs::IODeviceStatus Gripper::getGripperState()
 {
     std::lock_guard<std::mutex> lock(mutex_state);
     return state;
 }
 
-void Gripper::setGripperProperties(const baxter_core_msgs::EndEffectorProperties& _props)
+void Gripper::setGripperProperties(const intera_core_msgs::IODeviceConfiguration& _props)
 {
     std::lock_guard<std::mutex> lock(mutex_props);
     props = _props;
 }
 
-baxter_core_msgs::EndEffectorProperties Gripper::getGripperProperties()
+intera_core_msgs::IODeviceConfiguration Gripper::getGripperProperties()
 {
     std::lock_guard<std::mutex> lock(mutex_props);
     return props;
 }
 
-void Gripper::gripperCb(const EndEffectorState &msg)
+void Gripper::gripperCb(const IODeviceStatus &msg)
 {
     ROS_DEBUG("[%s_gripper][%s] Received new state", getGripperLimb().c_str(), type().c_str());
     setGripperState(msg);
@@ -93,7 +87,7 @@ void Gripper::gripperCb(const EndEffectorState &msg)
     }
 }
 
-void Gripper::gripperPropCb(const EndEffectorProperties &msg)
+void Gripper::gripperPropCb(const IODeviceConfiguration &msg)
 {
     ROS_DEBUG("[%s_gripper][%s] Received gripper properties",
                    getGripperLimb().c_str(), type().c_str());
@@ -122,8 +116,8 @@ void Gripper::setParameters(std::string _parameters, bool _defaults)
         }
     }
     // send the parameters to the gripper
-    std::string param_cmd = EndEffectorCommand::CMD_CONFIGURE;
-    command(param_cmd, false, 0.0, parameters);
+    // std::string param_cmd = IOComponentCommands::CMD_CONFIGURE;
+    // command(param_cmd, false, 0.0, parameters);
 }
 
 std::string Gripper::validParameters()
@@ -151,16 +145,14 @@ void Gripper::calibrate(bool _block, double _timeout)
 {
     if(type() != "electric") { capabilityWarning("calibrate"); }
 
-    std::string calibrate_cmd = EndEffectorCommand::CMD_CALIBRATE;
-    command(calibrate_cmd, _block, _timeout, "");
+    command("set", _block, _timeout, "{signals: {calibrate: {data: [True]}}}");
 }
 
 void Gripper::clearCalibration()
 {
     if(type() != "electric") { capabilityWarning("clearCalibration"); }
 
-    std::string clear_calibrate_cmd = EndEffectorCommand::CMD_CLEAR_CALIBRATION;
-    command(clear_calibrate_cmd, false, 0.0, "");
+    command("set", false, 0.0, "{signals: {calibrate: {data: [False]}}}");
 }
 
 bool Gripper::reboot()
@@ -175,36 +167,67 @@ bool Gripper::reboot()
     ROS_INFO("[%s_gripper][%s] Rebooting. Please wait...",
                 getGripperLimb().c_str(), type().c_str());
 
-    std::string reboot_cmd = EndEffectorCommand::CMD_REBOOT;
-    command(reboot_cmd, true, 5.0, "");
+    command("set", true, 5.0, "{signals: {reboot: {data: [True]}}}");
 
     ROS_INFO("Reboot complete");
     return true;
 }
 
-int Gripper::get_id()
+std::string Gripper::get_name()
 {
-    return getGripperState().id;
+    return getGripperState().device.name;
 }
 
 bool Gripper::is_enabled()
 {
-    return getGripperState().enabled==EndEffectorState::STATE_TRUE;
+    //return getGripperState().enabled==IODeviceStatus::STATE_TRUE;
+    return true;
 }
 
 bool Gripper::is_calibrated()
 {
-    return getGripperState().calibrated==EndEffectorState::STATE_TRUE;
+    vector<IODataStatus> signals = getGripperState().signals;
+    for (auto sig : signals)
+    {
+        if (sig.name == "is_calibrated")
+        {
+            if (sig.data == "[true]")
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
+    return false;
 }
 
 bool Gripper::is_ready_to_grip()
 {
-    return getGripperState().ready==EndEffectorState::STATE_TRUE;
+    //return getGripperState().ready==IODeviceStatus::STATE_TRUE;
+    return true;
 }
 
 bool Gripper::has_error()
 {
-    return getGripperState().error==EndEffectorState::STATE_TRUE;
+    vector<IODataStatus> signals = getGripperState().signals;
+    for (auto sig : signals)
+    {
+        if (sig.name == "has_error")
+        {
+            if (sig.data == "[true]")
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
+    return false;
 }
 
 bool Gripper::is_sucking()
@@ -212,15 +235,31 @@ bool Gripper::is_sucking()
     if(type() != "suction") { capabilityWarning("is_sucking"); }
 
     // ROS_INFO("force is: %g\n",getGripperState().force);
-    return getGripperState().position<80;
+    // return getGripperState().position<80;
+    return false;
 }
 
 bool Gripper::is_gripping()
 {
-    return getGripperState().gripping==EndEffectorState::STATE_TRUE;
+    vector<IODataStatus> signals = getGripperState().signals;
+    for (auto sig : signals)
+    {
+        if (sig.name == "is_gripping")
+        {
+            if (sig.data == "[true]")
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
+    return false;
 }
 
-bool Gripper::hasForce()
+/*bool Gripper::hasForce()
 {
     return getGripperProperties().controls_force == true;
 }
@@ -228,7 +267,7 @@ bool Gripper::hasForce()
 bool Gripper::hasPosition()
 {
     return getGripperProperties().controls_position == true;
-}
+}*/
 
 bool Gripper::open(bool _block, double _timeout)
 {
@@ -274,7 +313,8 @@ bool Gripper::close(bool _block, double _timeout)
     {
         // no checks here for is_sucking() so that
         // the suction time may be extended as necessary
-        return commandSuction(_block, _timeout);
+        //return commandSuction(_block, _timeout);
+        return false;
     }
     else
     {
@@ -306,11 +346,10 @@ bool Gripper::commandPosition(double _position, bool _block, double _timeout)
     if(_position >= 0.0 && _position <= 100.0)
     {
         ROS_DEBUG("Commanding position %g", _position);
-        std::string position_cmd = EndEffectorCommand::CMD_GO;
-        std::string position_args = "{\"position\": " +
-                                     std::to_string(_position) + "}";
+        double position_m = ((double)_position)/100.0*0.041667;
+        std::string position_args = "{signals: {position_m: {data: [" + std::to_string(position_m) + "]}}}";
 
-        return command(position_cmd, _block, _timeout, position_args);
+        return command("set", _block, _timeout, position_args);
     }
     else
     {
@@ -320,7 +359,7 @@ bool Gripper::commandPosition(double _position, bool _block, double _timeout)
     }
 }
 
-bool Gripper::commandSuction(bool _block, double _timeout)
+/*bool Gripper::commandSuction(bool _block, double _timeout)
 {
     // give a warning if not capable and return
     if(type() != "suction")
@@ -329,43 +368,41 @@ bool Gripper::commandSuction(bool _block, double _timeout)
         return false;
     }
 
-    std::string suction_cmd = EndEffectorCommand::CMD_GO;
+    std::string suction_cmd = IOComponentCommands::CMD_GO;
     std::string suction_args = "{\"grip_attempt_seconds\": " +
                                 std::to_string(_timeout) + "}";
 
     return command(suction_cmd, _block, _timeout, suction_args);
-}
+}*/
 
 bool Gripper::stop(bool _block, double _timeout)
 {
-    std::string stop_cmd;
+    /*std::string stop_cmd;
 
     if(type() == "electric")
     {
-        stop_cmd = EndEffectorCommand::CMD_STOP;
+        stop_cmd = IOComponentCommands::CMD_STOP;
     }
     else if(type() == "suction")
     {
-        stop_cmd = EndEffectorCommand::CMD_RELEASE;
+        stop_cmd = IOComponentCommands::CMD_RELEASE;
     }
     else
     {
         // give a warning if not capable and return
         capabilityWarning("stop");
         return false;
-    }
+    }*/
 
-    return command(stop_cmd, _block, _timeout);
+    return command("set", _block, _timeout, "{signals: {go: {data: [False]}}}");
 }
 
 bool Gripper::command(std::string _cmd, bool _block,
                       double _timeout, std::string _args)
 {
-    EndEffectorCommand ee_cmd;
-    ee_cmd.id = get_id();
-    ee_cmd.command = _cmd;
-    ee_cmd.sender = cmd_sender;
-    ee_cmd.sequence = incCmdSeq();
+    IOComponentCommand ee_cmd;
+    ee_cmd.time = ros::Time::now();
+    ee_cmd.op = _cmd;
     ee_cmd.args = "";
     if(_args != "")
     {
@@ -400,20 +437,20 @@ int Gripper::incCmdSeq()
 
 std::string Gripper::type()
 {
-    int ui_code = (int) getGripperProperties().ui_type;
+    /*int ui_code = (int) getGripperProperties().ui_type;
 
     if (ui_code == 1)
     {
         return "suction";
     }
     else if (ui_code == 2)
-    {
+    {*/
         return "electric";
-    }
+    /*}
     else
     {
         return "uninitialized";
-    }
+    }*/
 }
 
 bool Gripper::wait(ros::Duration _timeout)
