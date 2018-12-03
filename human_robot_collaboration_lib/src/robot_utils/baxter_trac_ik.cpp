@@ -18,7 +18,7 @@ baxterTracIK::baxterTracIK(std::string limb, bool _use_robot) :
     //           solution that maximizes sqrt(det(J*J^T))
     // TRACK_IK::Manip2: runs for full timeout, returns
     //           solution that minimizes cond(J) = |J|*|J^-1|);
-    _tracik_solver = new TRAC_IK::TRAC_IK("base", limb + "_gripper_tip", _urdf_param,
+    _tracik_solver = new TRAC_IK::TRAC_IK("base", limb + "_hand", _urdf_param,
                                           _timeout, _eps, TRAC_IK::Distance);
 
     KDL::JntArray ll, ul; //lower joint limits, upper joint limits

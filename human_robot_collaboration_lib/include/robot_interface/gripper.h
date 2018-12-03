@@ -24,6 +24,7 @@
 #include <baxter_core_msgs/EndEffectorProperties.h>
 
 #include <intera_core_msgs/IODeviceStatus.h>
+#include <intera_core_msgs/IONodeStatus.h>
 #include <intera_core_msgs/IODeviceConfiguration.h>
 #include <intera_core_msgs/IOComponentCommand.h>
 #include <intera_core_msgs/IOStatus.h>
@@ -35,6 +36,9 @@ class Gripper
 private:
     ros::NodeHandle gnh;    // ROS node handle
     std::string    limb;    // Limb of the gripper: left or right
+    std::string ee_name;
+    std::string ee_type;
+    ros::Time node_time;
 
     bool   use_robot;       // Flag to know if we're going to use the robot or not
     bool   first_run;       // Flag to calibrate the gripper at startup if needed
@@ -45,6 +49,8 @@ private:
     ros::Subscriber sub_state; // Subscriber to receive the state of the gripper
     ros::Subscriber  sub_prop; // Subscriber to receive the properties of the gripper
     ros::Publisher    pub_cmd; // Publisher for requesting actions to the gripper
+    ros::Publisher pub_end_effector_cmd;
+    ros::Subscriber sub_end_effector_state;
 
     ros::AsyncSpinner spinner; // AsyncSpinner to handle callbacks
 
@@ -57,6 +63,9 @@ private:
 
     int       cmd_sequence; // counter that tracks the sequence of gripper commands
     std::string cmd_sender; // retains the name of the node sending gripper commands
+
+    void gripperInitCb(const intera_core_msgs::IONodeStatus &msg);
+    void initialize(double _timeout = 5.0);
 
     /**
      * Callback that handles the gripper state messages.

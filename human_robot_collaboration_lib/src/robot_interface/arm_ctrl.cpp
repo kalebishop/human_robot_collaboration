@@ -6,9 +6,10 @@ using namespace intera_core_msgs;
 
 ArmCtrl::ArmCtrl(string _name, string _limb, bool _use_robot,
                  bool _use_forces, bool _use_trac_ik, bool _use_cart_ctrl) :
+                 Gripper(_limb, _use_robot),
                  RobotInterface(_name,_limb, _use_robot, THREAD_FREQ,
                                 _use_forces, _use_trac_ik, _use_cart_ctrl),
-                 Gripper(_limb, _use_robot), sub_state(""), action(""),
+                 sub_state(""), action(""),
                  prev_action(""), sel_object_id(-1), home_conf(7), arm_speed(ARM_SPEED),
                  cuff_button_pressed(false), pickedup_pos(-10.0, -10.0, -10.0)
 {
@@ -814,11 +815,6 @@ bool ArmCtrl::goHome()
 
 bool ArmCtrl::testGripper()
 {
-    if (!is_calibrated())
-    {
-        ROS_INFO("Gripper is not calibrated. Start calibrating.");
-        calibrate();
-    }
     if (!open(true, 1.0)) return false;
     ros::Duration(1.0).sleep();
     if (!close(true, 1.0)) return false;
