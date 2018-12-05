@@ -15,7 +15,25 @@ Gripper::Gripper(std::string _limb, bool _use_robot) :
     gnh.param<int> ("/print_level", g_print_level, 0);
 
     pub_end_effector_cmd = gnh.advertise<IOComponentCommand>("/io/end_effector/command", 10);
-    sub_end_effector_state = gnh.subscribe("/io/end_effector/state", SUBSCRIBER_BUFFER, &Gripper::gripperInitCb, this);
+    bool hasEEState = false;
+    ros::master::V_TopicInfo master_topics;
+    ros::master::getTopics(master_topics);
+    for (ros::master::V_TopicInfo::iterator it = master_topics.begin() ; it != master_topics.end(); it++)
+    {
+        const ros::master::TopicInfo& info = *it;
+        if (info.name == "/io/end_effector/state")
+        {
+            hasEEState = true;
+        }
+    }
+    if (hasEEState)
+    {
+        sub_end_effector_state = gnh.subscribe("/io/end_effector/state", SUBSCRIBER_BUFFER, &Gripper::gripperInitCb, this);
+    }
+    else
+    {
+        sub_end_effector_config = gnh.subscribe("/io/end_effector/config", SUBSCRIBER_BUFFER, &Gripper::gripperConfCb, this);
+    }
 
     spinner.start();
 
@@ -45,6 +63,48 @@ intera_core_msgs::IODeviceConfiguration Gripper::getGripperProperties()
 {
     std::lock_guard<std::mutex> lock(mutex_props);
     return props;
+}
+
+void Gripper::gripperConfCb(const IONodeConfiguration &msg)
+{
+    if (ee_name == "" || (node_time.sec != msg.time.sec || node_time.nsec != msg.time.nsec))
+    {
+        if (msg.devices.size() > 0)
+        {
+            if (ee_name != msg.devices[0].name)
+            {
+                ee_name = msg.devices[0].name;
+                ROS_INFO("Received EE Name: %s", ee_name.c_str());
+                // create a publisher for the gripper's commands
+                pub_cmd = gnh.advertise<IOComponentCommand>( "/io/end_effector/" +
+                                                            ee_name + "/command", 10);
+
+                // create a subscriber to the gripper's properties
+                sub_prop  = gnh.subscribe("/io/end_effector/" + ee_name + "/config",
+                                            SUBSCRIBER_BUFFER, &Gripper::gripperPropCb, this);
+
+                // create a subscriber to the gripper's state
+                sub_state = gnh.subscribe("/io/end_effector/" + ee_name + "/state",
+                                            SUBSCRIBER_BUFFER, &Gripper::gripperCb, this);
+
+                //Initially all the interesting properties of the state are unknown
+                IODeviceStatus init_state;
+                init_state.device.name = ee_name;
+
+                setGripperState(init_state);
+            }
+            if (ee_name != "right_gripper")
+            {
+                ee_type = "clicksmart";
+            }
+            else
+            {
+                ee_type = "electric";
+                return;
+            }
+            node_time = msg.time;
+        }
+    }
 }
 
 void Gripper::gripperInitCb(const IONodeStatus &msg)
@@ -185,15 +245,15 @@ std::string Gripper::validParameters()
 void Gripper::calibrate(bool _block, double _timeout)
 {
     if(type() != "electric") { capabilityWarning("calibrate"); }
-
-    command("set", _block, _timeout, "{signals: {calibrate: {data: [True]}}}");
+    std::string arg = "{\"signals\": {\"calibrate\": {\"data\": [true], \"format\": {\"type\": \"bool\"}}}}";
+    command("set", _block, _timeout, arg);
 }
 
 void Gripper::clearCalibration()
 {
     if(type() != "electric") { capabilityWarning("clearCalibration"); }
-
-    command("set", false, 0.0, "{signals: {calibrate: {data: [False]}}}");
+    std::string arg = "{\"signals\": {\"calibrate\": {\"data\": [false], \"format\": {\"type\": \"bool\"}}}}";
+    command("set", false, 0.0, arg);
 }
 
 bool Gripper::reboot()
@@ -208,7 +268,8 @@ bool Gripper::reboot()
     ROS_INFO("[%s_gripper][%s] Rebooting. Please wait...",
                 getGripperLimb().c_str(), type().c_str());
 
-    command("set", true, 5.0, "{signals: {reboot: {data: [True]}}}");
+    std::string arg = "{\"signals\": {\"reboot\": {\"data\": [true], \"format\": {\"type\": \"bool\"}}}}";
+    command("set", true, 5.0, arg);
 
     ROS_INFO("Reboot complete");
     return true;
@@ -346,7 +407,8 @@ bool Gripper::open(bool _block, double _timeout)
     }
     else if (type() == "clicksmart")
     {
-        return command("set", false, 0, "{\"signals\": {\"grip_BJech7Hky4\": {\"data\": [true], \"format\": {\"type\": \"bool\"}}}}");
+        std::string arg = "{\"signals\": {\"grip_BJech7Hky4\": {\"data\": [true], \"format\": {\"type\": \"bool\"}}}}";
+        return command("set", false, 0, arg);
     }
     else
     {
@@ -374,7 +436,8 @@ bool Gripper::close(bool _block, double _timeout)
     }
     else if (type() == "clicksmart")
     {
-        return command("set", false, 0, "{\"signals\": {\"grip_BJech7Hky4\": {\"data\": [false], \"format\": {\"type\": \"bool\"}}}}");
+        std::string arg = "{\"signals\": {\"grip_BJech7Hky4\": {\"data\": [false], \"format\": {\"type\": \"bool\"}}}}";
+        return command("set", false, 0, arg);
     }
     else
     {
@@ -407,7 +470,7 @@ bool Gripper::commandPosition(double _position, bool _block, double _timeout)
     {
         ROS_DEBUG("Commanding position %g", _position);
         double position_m = ((double)_position)/100.0*0.041667;
-        std::string position_args = "{signals: {position_m: {data: [" + std::to_string(position_m) + "]}}}";
+        std::string position_args = "{\"signals\": {\"position_m\": {\"data\": [" + std::to_string(position_m) + "]}}}";
 
         return command("set", _block, _timeout, position_args);
     }
@@ -453,8 +516,8 @@ bool Gripper::stop(bool _block, double _timeout)
         capabilityWarning("stop");
         return false;
     }*/
-
-    return command("set", _block, _timeout, "{signals: {go: {data: [False]}}}");
+    std::string arg = "{\"signals\": {\"go\": {\"data\": [false], \"format\": {\"type\": \"bool\"}}}}";
+    return command("set", _block, _timeout, arg);
 }
 
 bool Gripper::command(std::string _cmd, bool _block,

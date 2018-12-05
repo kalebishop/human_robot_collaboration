@@ -25,6 +25,7 @@
 
 #include <intera_core_msgs/IODeviceStatus.h>
 #include <intera_core_msgs/IONodeStatus.h>
+#include <intera_core_msgs/IONodeConfiguration.h>
 #include <intera_core_msgs/IODeviceConfiguration.h>
 #include <intera_core_msgs/IOComponentCommand.h>
 #include <intera_core_msgs/IOStatus.h>
@@ -51,6 +52,7 @@ private:
     ros::Publisher    pub_cmd; // Publisher for requesting actions to the gripper
     ros::Publisher pub_end_effector_cmd;
     ros::Subscriber sub_end_effector_state;
+    ros::Subscriber sub_end_effector_config;
 
     ros::AsyncSpinner spinner; // AsyncSpinner to handle callbacks
 
@@ -65,6 +67,7 @@ private:
     std::string cmd_sender; // retains the name of the node sending gripper commands
 
     void gripperInitCb(const intera_core_msgs::IONodeStatus &msg);
+    void gripperConfCb(const intera_core_msgs::IONodeConfiguration &msg);
     void initialize(double _timeout = 5.0);
 
     /**
