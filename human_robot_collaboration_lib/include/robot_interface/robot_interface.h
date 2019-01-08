@@ -47,6 +47,8 @@
 #include <human_robot_collaboration_msgs/GoToPose.h>
 #include <human_robot_collaboration_msgs/ArmState.h>
 
+#include <tf/transform_listener.h>
+
 /**
  * @brief A ROS Thread class
  * @details This class initializes overhead ROS features: subscriber/publishers,
@@ -165,6 +167,7 @@ private:
     geometry_msgs::Pose pose_curr;      // Current pose to task the IK with
 
     ros::Time time_start;   // Time when the controller started
+    tf::TransformListener tf_listener;
 
     /**
      * Initializes some control parameters when the controller starts.

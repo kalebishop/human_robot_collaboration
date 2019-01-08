@@ -184,6 +184,8 @@ public:
      **/
     explicit Gripper(std::string _limb, bool _use_robot = true);
 
+    std::string get_gripper_name() {return ee_name;}
+
     /**
      * Gets the state of the gripper, thread-safely.
      *

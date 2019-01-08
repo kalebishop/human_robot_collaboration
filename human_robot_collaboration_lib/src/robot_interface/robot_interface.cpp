@@ -13,7 +13,7 @@ RobotInterface::RobotInterface(string _name, string _limb, bool _use_robot, bool
                                bool _use_forces, bool _use_trac_ik, bool _use_cart_ctrl, bool _is_experimental) :
                                nh(_name), name(_name), limb(_limb), state(START), spinner(8), use_robot(_use_robot), use_simulator(_use_simulator),
                                use_forces(_use_forces), ir_ok(false), curr_range(0.0), curr_min_range(0.0), curr_max_range(0.0),
-                               ik_solver(_limb, _use_robot), use_trac_ik(_use_trac_ik), ctrl_freq(_ctrl_freq),
+                               ik_solver(_limb, "stp_021808TP00080", _use_robot), use_trac_ik(_use_trac_ik), ctrl_freq(_ctrl_freq),
                                filt_force(0.0, 0.0, 0.0), filt_change(0.0, 0.0, 0.0), time_filt_last_updated(ros::Time::now()),
                                is_coll_av_on(false), is_coll_det_on(false), is_closing(false), use_cart_ctrl(_use_cart_ctrl),
                                is_ctrl_running(false), is_experimental(_is_experimental), ctrl_track_mode(false),
@@ -507,13 +507,42 @@ void RobotInterface::cuffUpperCb(const intera_core_msgs::DigitalIOState& _msg)
 void RobotInterface::endpointCb(const intera_core_msgs::EndpointState& _msg)
 {
     ROS_INFO_COND(print_level>=12, "endpointCb");
-    curr_pos = _msg.pose.position;
-    curr_ori = _msg.pose.orientation;
-
-    if (use_forces == true)
+    tf::StampedTransform _transform;
+    if (1)
     {
-        curr_wrench = _msg.wrench;
-        filterForces();
+        try
+        {
+            tf_listener.lookupTransform("/base", "/stp_021808TP00080_tip", ros::Time(0), _transform);
+            curr_pos.x = _transform.getOrigin().x();
+            curr_pos.y = _transform.getOrigin().y();
+            curr_pos.z = _transform.getOrigin().z();
+            curr_ori.x = _transform.getRotation().x();
+            curr_ori.y = _transform.getRotation().y();
+            curr_ori.z = _transform.getRotation().z();
+            curr_ori.w = _transform.getRotation().w();
+        }
+        catch (tf::TransformException ex)
+        {
+            //ROS_ERROR("%s", ex.what());
+            curr_pos = _msg.pose.position;
+            curr_ori = _msg.pose.orientation;
+        }
+        if (use_forces == true)
+        {
+            curr_wrench = _msg.wrench;
+            filterForces();
+        }
+    }
+    else
+    {
+        curr_pos = _msg.pose.position;
+        curr_ori = _msg.pose.orientation;
+
+        if (use_forces == true)
+        {
+            curr_wrench = _msg.wrench;
+            filterForces();
+        }
     }
 
     return;
@@ -698,7 +727,8 @@ bool RobotInterface::computeIK(double px, double py, double pz,
 
         ros::Time tn = ros::Time::now();
 
-        bool result = use_trac_ik?ik_solver.perform_ik(ik_srv):ik_client.call(ik_srv);
+        //bool result = use_trac_ik?ik_solver.perform_ik(ik_srv):ik_client.call(ik_srv);
+        bool result = ik_solver.perform_ik(ik_srv);
 
         if(result)
         {

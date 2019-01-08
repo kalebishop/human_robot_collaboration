@@ -114,7 +114,7 @@ protected:
      *
      * @param msg the topic message
      */
-    virtual void cuffUpperCb(const baxter_core_msgs::DigitalIOState& msg);
+    virtual void cuffUpperCb(const intera_core_msgs::IODeviceStatus& msg);
 
     /**
      * Waits for the user to press the cuff button. Used in the hold action.

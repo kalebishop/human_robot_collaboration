@@ -432,13 +432,20 @@ string ArmCtrl::actionDBToString()
     return res;
 }
 
-void ArmCtrl::cuffUpperCb(const baxter_core_msgs::DigitalIOState& _msg)
+void ArmCtrl::cuffUpperCb(const intera_core_msgs::IODeviceStatus& _msg)
 {
-    if (_msg.state == baxter_core_msgs::DigitalIOState::PRESSED)
+    for(size_t i = 0; i < _msg.signals.size(); i++)
     {
-        cuff_button_pressed = true;
+        if (_msg.signals[i].name == "right_button_upper")
+        {
+            if (_msg.signals[i].data == "[1]")
+            {
+                cuff_button_pressed = true;
+                return;
+            }
+            return;
+        }
     }
-
     return;
 }
 
