@@ -102,7 +102,7 @@ And finally:
 
 ```
 cd ~/code/hrc_ws/src
-git clone https://github.com/https://github.com/HIRO-group/human_robot_collaboration.git
+git clone https://github.com/HIRO-group/human_robot_collaboration.git
 ```
 
 ### Compilation & Testing
