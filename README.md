@@ -44,16 +44,42 @@ These two modes can be enabled concurrently, but this feature is disabled by def
 
 In this mode, the user can ask the robot to go to a specific _3D Position_ or _6D Pose_ (position + orientation), and the robot will simply go there (if physically possible). To guarantee safety, the robot _still_ has the standard safety systems enabled by default. More advanced uses are allowed, but not exposed to the user: if you want to tinker with advanced features, we recommend to specialize the [`RobotInterface` class](https://github.com/ScazLab/human_robot_collaboration/blob/master/human_robot_collaboration_lib/include/robot_interface/robot_interface.h).
 
-In order to use the Cartesian Controller Server, you have to launch it with:
+In order to use the Cartesian Controller Server, you have to launch it with (depending if you are using the Sawyer Robot or the Baxter Robot):
 
+Baxter:
 ```
 roslaunch human_robot_collaboration baxter_controller.launch
 ```
 
-This should create two topics the user can request operational space configurations to. They are `/baxter_controller/left/go_to_pose` for left arm, and `/baxter_controller/left/go_to_pose` for right arm. In the following, there are some examples on how to require them from terminal (e.g. for the left arm):
+Sawyer:
+
+```
+roslaunch human_robot_collaboration sawyer_controller.launch
+```
+
+
+Baxter Steps:
+
+This should create two topics the user can request operational space configurations to. They are `/baxter_controller/left/go_to_pose` for left arm, and `/baxter_controller/right/go_to_pose` for right arm. In the following, here are some terminal commands for controlling the robot:
 
  * _[6D Pose]_ : `rostopic pub /baxter_controller/left/go_to_pose human_robot_collaboration_msgs/GoToPose "{pose_stamp: {pose:{position:{ x: 0.55, y: 0.55, z: 0.2}, orientation:{ x: 0, y: 1, z: 0, w: 0}}}, ctrl_mode: 0}" --once`
  * _[3D Position]_ : `rostopic pub /baxter_controller/left/go_to_pose human_robot_collaboration_msgs/GoToPose "{pose_stamp: {pose:{position:{ x: 0.55, y: 0.55, z: 0.2}, orientation:{ x: -100, y: -100, z: -100, w: -100}}}, ctrl_mode: 0}" --once`. This differs from the previous case since now every value of the orientation quaternion is set to -100. This is to communicate the Cartesian Controller to reach the desired position _while maintaining the current orientation_.
+
+Sawyer Steps:
+
+For Sawyer, it only has 1 arm, so you can use the rostopic `/sawyer_controller/right/go_to_pose` for right arm. In the following, there are some examples on how to require them from terminal (e.g. for the left arm):
+
+ * _[6D Pose]_ : `rostopic pub -1 sawyer_controller/right/go_to_pose human_robot_collaboration_msgs/GoToPose "type: 'pose',
+ ctrl_mode: 1,
+ position: {x: 0.45, y: 0.45, z: 0.2},
+ orientation: {x: 1.0, y: 0.0, z: 0.0, w: 0.0}"`
+
+ 
+ * _[3D Position]_ : `rostopic pub -1 sawyer_controller/right/go_to_pose human_robot_collaboration_msgs/GoToPose "type: 'pose',
+ ctrl_mode: 1,
+ position: {x: 0.45, y: 0.45, z: 0.2},
+ orientation: {x: -100, y: -100, z: -100, w: -100}".` As with Sawyer, we are maintaining orientation here.
+
 
 Obviously, these same messages can be sent directly _within_ your code. Please take a look at the [`GoToPose.msg` file](https://github.com/ScazLab/human_robot_collaboration/blob/master/human_robot_collaboration_msgs/msg/GoToPose.msg) for further info.
 
