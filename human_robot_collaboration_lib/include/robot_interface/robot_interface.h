@@ -42,7 +42,7 @@
 #include <std_msgs/Empty.h>
 
 #include "robot_utils/particle_thread.h"
-#include "robot_utils/baxter_trac_ik.h"
+#include "robot_utils/hiro_trac_ik.h"
 
 #include <human_robot_collaboration_msgs/GoToPose.h>
 #include <human_robot_collaboration_msgs/ArmState.h>
@@ -87,7 +87,7 @@ private:
      * Inverse Kinematics
      */
     // Default: TRAC IK
-    baxterTracIK ik_solver;
+    hiroTracIK ik_solver;
 
     // Alternative IK: baxter-provided IK solver (for the TTT demo)
     bool             use_trac_ik;

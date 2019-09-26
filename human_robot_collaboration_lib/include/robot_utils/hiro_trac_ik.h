@@ -13,8 +13,8 @@
  * Public License for more details
 **/
 
-#ifndef __BAXTER_TRAC_IK_H__
-#define __BAXTER_TRAC_IK_H__
+#ifndef __HIRO_TRAC_IK_H__
+#define __HIRO_TRAC_IK_H__
 
 #include <trac_ik/trac_ik.hpp>
 #include <ros/ros.h>
@@ -24,7 +24,7 @@
 #include <intera_core_msgs/SolvePositionIK.h>
 #include "robot_interface/gripper.h"
 
-class baxterTracIK
+class hiroTracIK
 {
 private:
     std::string       _limb;
@@ -39,9 +39,9 @@ private:
     KDL::JntArray *_nominal;
 
 public:
-    explicit baxterTracIK(std::string limb, std::string ee_name, bool _use_robot = true);
+    explicit hiroTracIK(std::string limb, std::string ee_name, bool _use_robot = true);
 
-    ~baxterTracIK();
+    ~hiroTracIK();
 
     KDL::JntArray JointState2JntArray(const sensor_msgs::JointState &js);
 

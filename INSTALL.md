@@ -79,7 +79,7 @@ Mandatory dependencies:
 ```
 cd ~/code/hrc_ws/src
 git clone https://github.com/ScazLab/aruco_ros
-git clone https://bitbucket.org/alecive/trac_ik.git
+git clone https://bitbucket.org/traclabs/trac_ik.git
 git clone https://github.com/RethinkRobotics/baxter_common.git
 ```
 
@@ -102,7 +102,7 @@ And finally:
 
 ```
 cd ~/code/hrc_ws/src
-git clone https://github.com/ScazLab/human_robot_collaboration.git
+git clone https://github.com/https://github.com/HIRO-group/human_robot_collaboration.git
 ```
 
 ### Compilation & Testing

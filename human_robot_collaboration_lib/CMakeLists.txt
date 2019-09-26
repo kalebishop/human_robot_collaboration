@@ -78,12 +78,12 @@ add_library(robot_utils     include/robot_utils/utils.h
                             include/robot_utils/thread_safe.h
                             include/robot_utils/rviz_publisher.h
                             include/robot_utils/particle_thread.h
-                            include/robot_utils/baxter_trac_ik.h
+                            include/robot_utils/hiro_trac_ik.h
                             include/robot_utils/ros_thread_image.h
                             src/robot_utils/utils.cpp
                             src/robot_utils/rviz_publisher.cpp
                             src/robot_utils/particle_thread.cpp
-                            src/robot_utils/baxter_trac_ik.cpp
+                            src/robot_utils/hiro_trac_ik.cpp
                             src/robot_utils/ros_thread_image.cpp)
 
 add_library(robot_perception    include/robot_perception/cartesian_estimator.h
