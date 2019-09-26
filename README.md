@@ -46,12 +46,12 @@ In this mode, the user can ask the robot to go to a specific _3D Position_ or _6
 
 In order to use the Cartesian Controller Server, you have to launch it with (depending if you are using the Sawyer Robot or the Baxter Robot):
 
-Baxter:
+**Baxter:**
 ```
 roslaunch human_robot_collaboration baxter_controller.launch
 ```
 
-Sawyer:
+**Sawyer:**
 
 ```
 roslaunch human_robot_collaboration sawyer_controller.launch
