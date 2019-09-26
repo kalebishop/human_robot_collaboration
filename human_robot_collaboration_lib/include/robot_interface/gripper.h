@@ -23,6 +23,13 @@
 #include <baxter_core_msgs/EndEffectorCommand.h>
 #include <baxter_core_msgs/EndEffectorProperties.h>
 
+#include <intera_core_msgs/IODeviceStatus.h>
+#include <intera_core_msgs/IONodeStatus.h>
+#include <intera_core_msgs/IONodeConfiguration.h>
+#include <intera_core_msgs/IODeviceConfiguration.h>
+#include <intera_core_msgs/IOComponentCommand.h>
+#include <intera_core_msgs/IOStatus.h>
+
 #include "robot_utils/utils.h"
 
 class Gripper
@@ -30,6 +37,9 @@ class Gripper
 private:
     ros::NodeHandle gnh;    // ROS node handle
     std::string    limb;    // Limb of the gripper: left or right
+    std::string ee_name;
+    std::string ee_type;
+    ros::Time node_time;
 
     bool   use_robot;       // Flag to know if we're going to use the robot or not
     bool   first_run;       // Flag to calibrate the gripper at startup if needed
@@ -40,11 +50,14 @@ private:
     ros::Subscriber sub_state; // Subscriber to receive the state of the gripper
     ros::Subscriber  sub_prop; // Subscriber to receive the properties of the gripper
     ros::Publisher    pub_cmd; // Publisher for requesting actions to the gripper
+    ros::Publisher pub_end_effector_cmd;
+    ros::Subscriber sub_end_effector_state;
+    ros::Subscriber sub_end_effector_config;
 
     ros::AsyncSpinner spinner; // AsyncSpinner to handle callbacks
 
-    baxter_core_msgs::EndEffectorState      state; // State of the gripper
-    baxter_core_msgs::EndEffectorProperties props; // properties of the gripper
+    intera_core_msgs::IODeviceStatus        state; // State of the gripper
+    intera_core_msgs::IODeviceConfiguration props; // properties of the gripper
     std::mutex mutex_state;                        // mutex for controlled state access
     std::mutex mutex_props;                        // mutex for controlled properties access
 
@@ -53,36 +66,40 @@ private:
     int       cmd_sequence; // counter that tracks the sequence of gripper commands
     std::string cmd_sender; // retains the name of the node sending gripper commands
 
+    void gripperInitCb(const intera_core_msgs::IONodeStatus &msg);
+    void gripperConfCb(const intera_core_msgs::IONodeConfiguration &msg);
+    void initialize(double _timeout = 5.0);
+
     /**
      * Callback that handles the gripper state messages.
      */
-    void gripperCb(const baxter_core_msgs::EndEffectorState &msg);
+    void gripperCb(const intera_core_msgs::IODeviceStatus &msg);
 
     /**
      * Sets the state to the new state, thread-safely
      *
      * @param _state the new state
      */
-    void setGripperState(const baxter_core_msgs::EndEffectorState& _state);
+    void setGripperState(const intera_core_msgs::IODeviceStatus& _state);
 
     /**
      * Callback that handles the gripper properties messages
      */
-    void gripperPropCb(const baxter_core_msgs::EndEffectorProperties &msg);
+    void gripperPropCb(const intera_core_msgs::IODeviceConfiguration &msg);
 
     /**
      * Sets properties to the new properties, thread-safely
      *
      * @param _properties the new properties
      */
-    void setGripperProperties(const baxter_core_msgs::EndEffectorProperties& _properties);
+    void setGripperProperties(const intera_core_msgs::IODeviceConfiguration& _properties);
 
     /**
-     * Gets the ID of the gripper
+     * Gets the name of the gripper
      *
-     * @return The ID of the gripper
+     * @return The name of the gripper
      */
-    int get_id();
+    std::string get_name();
 
     /**
      * Stop the gripper at the current position and apply the holding force
@@ -167,19 +184,21 @@ public:
      **/
     explicit Gripper(std::string _limb, bool _use_robot = true);
 
+    std::string get_gripper_name() {return ee_name;}
+
     /**
      * Gets the state of the gripper, thread-safely.
      *
      * @return the state of the gripper
      */
-    baxter_core_msgs::EndEffectorState getGripperState();
+    intera_core_msgs::IODeviceStatus getGripperState();
 
     /**
      * Gets the properties of the gripper, thread-safely
      *
      * @return the properties of the gripper
      */
-    baxter_core_msgs::EndEffectorProperties getGripperProperties();
+    intera_core_msgs::IODeviceConfiguration getGripperProperties();
 
     /**
      * Commands minimum gripper position

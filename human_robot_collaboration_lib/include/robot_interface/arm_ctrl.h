@@ -30,7 +30,7 @@
 #define HAND_OVER_DONE   "handover_done"
 #define HAND_OVER_WAIT   "handover_wait"
 
-class ArmCtrl : public RobotInterface, public Gripper
+class ArmCtrl : public Gripper, public RobotInterface
 {
 private:
     // Substate of the controller (useful to keep track of
@@ -114,7 +114,7 @@ protected:
      *
      * @param msg the topic message
      */
-    virtual void cuffUpperCb(const baxter_core_msgs::DigitalIOState& msg);
+    virtual void cuffUpperCb(const intera_core_msgs::IODeviceStatus& msg);
 
     /**
      * Waits for the user to press the cuff button. Used in the hold action.
@@ -401,6 +401,8 @@ protected:
      * @return        true/false if success/failure
      */
     bool goHome();
+
+    bool testGripper();
 
     /********************************************************************/
     /*                        HOVER CAPABILITIES                        */

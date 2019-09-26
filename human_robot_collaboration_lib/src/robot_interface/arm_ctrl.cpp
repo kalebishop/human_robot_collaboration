@@ -2,13 +2,14 @@
 
 using namespace std;
 using namespace geometry_msgs;
-using namespace baxter_core_msgs;
+using namespace intera_core_msgs;
 
 ArmCtrl::ArmCtrl(string _name, string _limb, bool _use_robot,
                  bool _use_forces, bool _use_trac_ik, bool _use_cart_ctrl) :
+                 Gripper(_limb, _use_robot),
                  RobotInterface(_name,_limb, _use_robot, THREAD_FREQ,
                                 _use_forces, _use_trac_ik, _use_cart_ctrl),
-                 Gripper(_limb, _use_robot), sub_state(""), action(""),
+                 sub_state(""), action(""),
                  prev_action(""), sel_object_id(-1), home_conf(7), arm_speed(ARM_SPEED),
                  cuff_button_pressed(false), pickedup_pos(-10.0, -10.0, -10.0)
 {
@@ -25,6 +26,7 @@ ArmCtrl::ArmCtrl(string _name, string _limb, bool _use_robot,
     insertAction(ACTION_HOME,    &ArmCtrl::goHome);
     insertAction(ACTION_RELEASE, &ArmCtrl::openImpl);
     insertAction(ACTION_HOLD,    &ArmCtrl::holdObject);
+    insertAction(ACTION_TEST_GRIPPER, &ArmCtrl::testGripper);
 
     nh.param<bool>("internal_recovery",  internal_recovery, true);
     ROS_INFO("[%s] Internal_recovery flag set to %s", getLimb().c_str(),
@@ -71,7 +73,7 @@ void ArmCtrl::InternalThreadEntry()
         ros::Duration(2.0).sleep();
         setState(DONE);
     }
-    else if (a == ACTION_HOME || a == ACTION_RELEASE)
+    else if (a == ACTION_HOME || a == ACTION_RELEASE || a == ACTION_TEST_GRIPPER)
     {
         if (doAction(s, a))  { setState(DONE); }
     }
@@ -156,7 +158,7 @@ bool ArmCtrl::serviceCb(human_robot_collaboration_msgs::DoAction::Request  &req,
 
     setAction(action);
 
-    if (action != ACTION_HOME && action != ACTION_RELEASE && action != ACTION_HOLD &&
+    if (action != ACTION_HOME && action != ACTION_RELEASE && action != ACTION_HOLD && action != ACTION_TEST_GRIPPER &&
         action != std::string(ACTION_HOLD) + "_leg" &&
         action != std::string(ACTION_HOLD) + "_top" &&
         action != "start_" + std::string(ACTION_HOLD) &&
@@ -430,13 +432,20 @@ string ArmCtrl::actionDBToString()
     return res;
 }
 
-void ArmCtrl::cuffUpperCb(const baxter_core_msgs::DigitalIOState& _msg)
+void ArmCtrl::cuffUpperCb(const intera_core_msgs::IODeviceStatus& _msg)
 {
-    if (_msg.state == baxter_core_msgs::DigitalIOState::PRESSED)
+    for(size_t i = 0; i < _msg.signals.size(); i++)
     {
-        cuff_button_pressed = true;
+        if (_msg.signals[i].name == "right_button_upper")
+        {
+            if (_msg.signals[i].data == "[1]")
+            {
+                cuff_button_pressed = true;
+                return;
+            }
+            return;
+        }
     }
-
     return;
 }
 
@@ -809,6 +818,15 @@ bool ArmCtrl::goHome()
     bool res = homePoseStrict();
     open();
     return res;
+}
+
+bool ArmCtrl::testGripper()
+{
+    if (!open(true, 1.0)) return false;
+    ros::Duration(1.0).sleep();
+    if (!close(true, 1.0)) return false;
+    ros::Duration(1.0).sleep();
+    return true;
 }
 
 bool ArmCtrl::cleanUpObject()

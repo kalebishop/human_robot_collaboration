@@ -16,14 +16,14 @@ int main(int argc, char ** argv)
     printf("\n");
     ROS_INFO("use_robot flag set to %s", use_robot==true?"true":"false");
 
-    printf("\n");
-    LeftCtrl   left_ctrl("action_provider", "left", use_robot);
+    //printf("\n");
+    //LeftCtrl   left_ctrl("action_provider", "left", use_robot);
     printf("\n");
     RightCtrl right_ctrl("action_provider","right", use_robot);
     printf("\n");
     ROS_INFO("READY! Waiting for service messages..\n");
-
-    ros::spin();
+    ros::MultiThreadedSpinner spinner(4);
+    spinner.spin();
     return 0;
 }
 

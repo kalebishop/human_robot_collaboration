@@ -33,11 +33,13 @@
 
   <depend>aruco</depend>
   <depend>human_robot_collaboration_lib</depend>
+  <depend>human_robot_collaboration_msgs</depend>
   <depend>cv_bridge</depend>
   <depend>image_transport</depend>
   <depend>rosconsole</depend>
   <depend>ros_speech2text</depend>
   <depend>svox_tts</depend>
+  <depend>intera_core_msgs</depend>
 
   <test_depend>baxter_description</test_depend>
 

@@ -1,0 +1,21 @@
+<launch>
+    <!--<env name="ROSCONSOLE_CONFIG_FILE" value="$(find human_robot_collaboration)/rosconsole.conf"/>-->
+    <!-- <include file="$(find human_robot_collaboration)/launch/baxter_aruco.launch" />
+    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/> -->
+
+    <arg name="forceThresholdL"      default="2.0"/>    <!-- [N] -->
+    <arg name="forceThresholdR"      default="2.0"/>    <!-- [N] -->
+
+    <!-- If the system should use the robot or not (useful for debugging) -->
+    <arg name="use_robot"            default="true"/>
+    <arg name="use_simulator"        default="false"/>
+    <rosparam param="/print_level">4</rosparam>
+
+    <param name="sawyer_controller/force_threshold_left"  value="$(arg forceThresholdL)"/>
+    <param name="sawyer_controller/force_threshold_right" value="$(arg forceThresholdR)"/>
+    <param name="sawyer_controller/use_robot"             value="$(arg use_robot)"/>
+    <param name="sawyer_controller/use_simulator"         value="$(arg use_simulator)"/>
+
+    <node pkg="human_robot_collaboration" type="sawyer_controller" name="sawyer_controller" output="screen"/>
+
+</launch>

@@ -15,6 +15,7 @@ endif()
 find_package(catkin REQUIRED COMPONENTS
              aruco
              human_robot_collaboration_lib
+             human_robot_collaboration_msgs
              baxter_core_msgs
              cv_bridge
              image_transport
@@ -22,9 +23,10 @@ find_package(catkin REQUIRED COMPONENTS
              roscpp
              rospy
              ros_speech2text
+             intera_core_msgs
              )
 
-find_package(OpenCV 2.4 REQUIRED)
+find_package(OpenCV 3.3 REQUIRED)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -59,6 +61,7 @@ include_directories(SYSTEM ${OpenCV_INCLUDE_DIRS}
 
 ## Declare a C++ executable
 add_executable(baxter_controller           src/baxter_controller/baxter_controller.cpp)
+add_executable(sawyer_controller           src/sawyer_controller/sawyer_controller.cpp)
 add_executable(flatpack_action_provider    src/flatpack_furniture/left_ctrl.h
                                            src/flatpack_furniture/right_ctrl.h
                                            src/flatpack_furniture/action_provider.cpp)
@@ -77,6 +80,8 @@ add_executable(hsv_detector                src/hsv_detector.cpp)
 ## same as for the library above
 add_dependencies(baxter_controller           ${${PROJECT_NAME}_EXPORTED_TARGETS}
                                              ${catkin_EXPORTED_TARGETS})
+add_dependencies(sawyer_controller           ${${PROJECT_NAME}_EXPORTED_TARGETS}
+                                             ${catkin_EXPORTED_TARGETS})
 add_dependencies(flatpack_action_provider    ${${PROJECT_NAME}_EXPORTED_TARGETS}
                                              ${catkin_EXPORTED_TARGETS})
 add_dependencies(tower_action_provider       ${${PROJECT_NAME}_EXPORTED_TARGETS}
@@ -92,6 +97,7 @@ add_dependencies(baxter_display              ${${PROJECT_NAME}_EXPORTED_TARGETS}
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(baxter_controller                        ${catkin_LIBRARIES} )
+target_link_libraries(sawyer_controller                        ${catkin_LIBRARIES} )
 target_link_libraries(flatpack_action_provider                 ${catkin_LIBRARIES} )
 target_link_libraries(tower_action_provider                    ${catkin_LIBRARIES} )
 target_link_libraries(hsv_detector                             ${catkin_LIBRARIES} )
