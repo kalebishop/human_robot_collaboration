@@ -651,7 +651,6 @@ bool RobotInterface::goToJointConfNoCheck(VectorXd joint_values)
     return true;
 }
 
-
 bool RobotInterface::goToPose(double px, double py, double pz,
                               double ox, double oy, double oz, double ow,
                               string mode, bool disable_coll_av)
