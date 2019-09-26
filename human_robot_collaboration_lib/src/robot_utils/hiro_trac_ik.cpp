@@ -1,6 +1,6 @@
-#include "robot_utils/baxter_trac_ik.h"
+#include "robot_utils/hiro_trac_ik.h"
 
-baxterTracIK::baxterTracIK(std::string limb, std::string ee_name, bool _use_robot) :
+hiroTracIK::hiroTracIK(std::string limb, std::string ee_name, bool _use_robot) :
                 _limb(limb), _urdf_param("/robot_description"),
                 _timeout(0.005), _eps(1e-6), _num_steps(4)
 {
@@ -61,18 +61,18 @@ baxterTracIK::baxterTracIK(std::string limb, std::string ee_name, bool _use_robo
     }
 }
 
-bool baxterTracIK::getKDLLimits(KDL::JntArray &ll, KDL::JntArray &ul)
+bool hiroTracIK::getKDLLimits(KDL::JntArray &ll, KDL::JntArray &ul)
 {
     return _tracik_solver->getKDLLimits(ll,ul);
 }
 
-bool baxterTracIK::setKDLLimits(KDL::JntArray ll, KDL::JntArray ul)
+bool hiroTracIK::setKDLLimits(KDL::JntArray ll, KDL::JntArray ul)
 {
     _tracik_solver->setKDLLimits(ll,ul);
     return true;
 }
 
-baxterTracIK::~baxterTracIK()
+hiroTracIK::~hiroTracIK()
 {
     if (_tracik_solver)
     {
@@ -87,7 +87,7 @@ baxterTracIK::~baxterTracIK()
     }
 }
 
-KDL::JntArray baxterTracIK::JointState2JntArray(const sensor_msgs::JointState &js)
+KDL::JntArray hiroTracIK::JointState2JntArray(const sensor_msgs::JointState &js)
 {
     KDL::JntArray array(_chain.getNrOfJoints());
     for(size_t joint=0; joint<js.position.size(); ++joint)
@@ -97,7 +97,7 @@ KDL::JntArray baxterTracIK::JointState2JntArray(const sensor_msgs::JointState &j
     return array;
 }
 
-bool baxterTracIK::perform_ik(intera_core_msgs::SolvePositionIK &ik_srv)
+bool hiroTracIK::perform_ik(intera_core_msgs::SolvePositionIK &ik_srv)
 {
     int rc = -1;
     KDL::JntArray result;
@@ -156,7 +156,7 @@ bool baxterTracIK::perform_ik(intera_core_msgs::SolvePositionIK &ik_srv)
 #include <kdl/chainfksolverpos_recursive.hpp>
 #include <kdl/frames_io.hpp>
 
-void baxterTracIK::computeFwdKin(KDL::JntArray jointpositions)
+void hiroTracIK::computeFwdKin(KDL::JntArray jointpositions)
 {
     printf("joints:\t");
     for(size_t j=0; j<_chain.getNrOfJoints(); ++j)

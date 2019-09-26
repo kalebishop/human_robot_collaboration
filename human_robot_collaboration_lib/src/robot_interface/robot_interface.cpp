@@ -44,8 +44,8 @@ RobotInterface::RobotInterface(string _name, string _limb, bool _use_robot, bool
     ROS_INFO_COND(print_level>=3, "[%s] Force Filter Variance: %g", getLimb().c_str(), filt_variance);
     ROS_INFO_COND(print_level>=3, "[%s] Relative Force Threshold: %g", getLimb().c_str(), rel_force_thres);
 
-    joint_cmd_pub  = nh.advertise<JointCommand>("/robot/limb/" + getLimb() + "/joint_command", 1);
-    coll_av_pub    = nh.advertise<std_msgs::Empty>("/robot/limb/" + getLimb() + "/suppress_collision_avoidance", 1);
+    joint_cmd_pub  = nh.advertise<JointCommand>("/robot/limb/" + getLimb() + "/joint_command", 200);
+    coll_av_pub    = nh.advertise<std_msgs::Empty>("/robot/limb/" + getLimb() + "/suppress_collision_avoidance", 200);
 
     endpt_sub      = nh.subscribe("/robot/limb/" + getLimb() + "/endpoint_state",
                                    SUBSCRIBER_BUFFER, &RobotInterface::endpointCb, this);
@@ -658,7 +658,7 @@ bool RobotInterface::goToPose(double px, double py, double pz,
     VectorXd joint_angles;
     if (!computeIK(px, py, pz, ox, oy, oz, ow, joint_angles)) return false;
 
-    ros::Rate r(100);
+    ros::Rate r(800);
     while (RobotInterface::ok() && not isClosing())
     {
         if (disable_coll_av)
