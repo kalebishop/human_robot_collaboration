@@ -22,12 +22,12 @@
 
 #include "gtest/gtest_prod.h"
 
-#include <baxter_core_msgs/DigitalIOState.h>
-#include <baxter_core_msgs/EndpointState.h>
-#include <baxter_core_msgs/CollisionAvoidanceState.h>
-#include <baxter_core_msgs/CollisionDetectionState.h>
-#include <baxter_core_msgs/JointCommand.h>
-#include <baxter_core_msgs/SolvePositionIK.h>
+// #include <baxter_core_msgs/DigitalIOState.h>
+// #include <baxter_core_msgs/EndpointState.h>
+// #include <baxter_core_msgs/CollisionAvoidanceState.h>
+// #include <baxter_core_msgs/CollisionDetectionState.h>
+// #include <baxter_core_msgs/JointCommand.h>
+// #include <baxter_core_msgs/SolvePositionIK.h>
 
 // sawyer core msgs
 #include <intera_core_msgs/DigitalIOState.h>

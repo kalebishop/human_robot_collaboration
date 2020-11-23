@@ -25,7 +25,6 @@ find_package(catkin REQUIRED COMPONENTS
              aruco_ros
              aruco_msgs
              human_robot_collaboration_msgs
-             baxter_core_msgs
              cv_bridge
              image_transport
              rosconsole
@@ -38,7 +37,7 @@ find_package(catkin REQUIRED COMPONENTS
              intera_motion_msgs
              )
 
-find_package(OpenCV 3.3 REQUIRED)
+find_package(OpenCV 3.2 REQUIRED) # KB i changed this from 3.3
 find_package(Eigen3     REQUIRED)
 
 ###################################
@@ -148,9 +147,9 @@ install(DIRECTORY   ${PROJECT_SOURCE_DIR}/include/robot_utils
 #############
 
 ## Add gtest based cpp test target and link libraries
-if(CATKIN_ENABLE_TESTING)
-  add_subdirectory(test)
-endif()
+# if(CATKIN_ENABLE_TESTING)
+#   add_subdirectory(test)
+# endif()
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)

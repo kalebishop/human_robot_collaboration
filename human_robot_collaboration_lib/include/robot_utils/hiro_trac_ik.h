@@ -20,7 +20,7 @@
 #include <ros/ros.h>
 #include <kdl/chainiksolverpos_nr_jl.hpp>
 #include <sensor_msgs/JointState.h>
-#include <baxter_core_msgs/SolvePositionIK.h>
+// #include <baxter_core_msgs/SolvePositionIK.h>
 #include <intera_core_msgs/SolvePositionIK.h>
 #include "robot_interface/gripper.h"
 

@@ -1,3 +1,0 @@
-<launch>
-    <test test-name="test_ros_thread_image" pkg="human_robot_collaboration_lib" type="test_ros_thread_image" />
-</launch>

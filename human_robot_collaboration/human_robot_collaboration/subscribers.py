@@ -3,7 +3,7 @@ from threading import Lock
 import rospy
 from std_msgs.msg import String
 
-from baxter_core_msgs.msg import DigitalIOState
+from intera_core_msgs.msg import DigitalIOState
 from ros_speech2text.msg import transcript
 
 

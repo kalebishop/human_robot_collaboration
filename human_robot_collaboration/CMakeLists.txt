@@ -16,7 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
              aruco
              human_robot_collaboration_lib
              human_robot_collaboration_msgs
-             baxter_core_msgs
+        #      baxter_core_msgs
              cv_bridge
              image_transport
              rosconsole
@@ -26,7 +26,7 @@ find_package(catkin REQUIRED COMPONENTS
              intera_core_msgs
              )
 
-find_package(OpenCV 3.3 REQUIRED)
+find_package(OpenCV 3.2 REQUIRED) # KB: i changed this from 3.3
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -60,7 +60,7 @@ include_directories(SYSTEM ${OpenCV_INCLUDE_DIRS}
                            ${catkin_INCLUDE_DIRS})
 
 ## Declare a C++ executable
-add_executable(baxter_controller           src/baxter_controller/baxter_controller.cpp)
+# add_executable(baxter_controller           src/baxter_controller/baxter_controller.cpp)
 add_executable(sawyer_controller           src/sawyer_controller/sawyer_controller.cpp)
 add_executable(flatpack_action_provider    src/flatpack_furniture/left_ctrl.h
                                            src/flatpack_furniture/right_ctrl.h
@@ -73,13 +73,13 @@ add_executable(modular_action_provider     src/modular_furniture/right_ctrl.h
 add_executable(chair_task_action_provider  src/chair_task/right_ctrl.h
                                            src/modular_furniture/left_ctrl.h
                                            src/chair_task/action_provider.cpp)
-add_executable(baxter_display              src/baxter_display.cpp)
+# add_executable(baxter_display              src/baxter_display.cpp)
 add_executable(hsv_detector                src/hsv_detector.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-add_dependencies(baxter_controller           ${${PROJECT_NAME}_EXPORTED_TARGETS}
-                                             ${catkin_EXPORTED_TARGETS})
+# add_dependencies(baxter_controller           ${${PROJECT_NAME}_EXPORTED_TARGETS}
+#                                              ${catkin_EXPORTED_TARGETS})
 add_dependencies(sawyer_controller           ${${PROJECT_NAME}_EXPORTED_TARGETS}
                                              ${catkin_EXPORTED_TARGETS})
 add_dependencies(flatpack_action_provider    ${${PROJECT_NAME}_EXPORTED_TARGETS}
@@ -92,18 +92,18 @@ add_dependencies(modular_action_provider     ${${PROJECT_NAME}_EXPORTED_TARGETS}
                                              ${catkin_EXPORTED_TARGETS})
 add_dependencies(chair_task_action_provider  ${${PROJECT_NAME}_EXPORTED_TARGETS}
                                              ${catkin_EXPORTED_TARGETS})
-add_dependencies(baxter_display              ${${PROJECT_NAME}_EXPORTED_TARGETS}
-                                             ${catkin_EXPORTED_TARGETS})
+# add_dependencies(baxter_display              ${${PROJECT_NAME}_EXPORTED_TARGETS}
+#                                              ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(baxter_controller                        ${catkin_LIBRARIES} )
+# target_link_libraries(baxter_controller                        ${catkin_LIBRARIES} )
 target_link_libraries(sawyer_controller                        ${catkin_LIBRARIES} )
 target_link_libraries(flatpack_action_provider                 ${catkin_LIBRARIES} )
 target_link_libraries(tower_action_provider                    ${catkin_LIBRARIES} )
 target_link_libraries(hsv_detector                             ${catkin_LIBRARIES} )
 target_link_libraries(modular_action_provider                  ${catkin_LIBRARIES} )
 target_link_libraries(chair_task_action_provider               ${catkin_LIBRARIES} )
-target_link_libraries(baxter_display            ${OpenCV_LIBS} ${catkin_LIBRARIES} )
+# target_link_libraries(baxter_display            ${OpenCV_LIBS} ${catkin_LIBRARIES} )
 
 #############
 ## Install ##
@@ -120,8 +120,8 @@ install(PROGRAMS
 )
 
 ## Mark executables and/or libraries for installation
-install(TARGETS baxter_controller flatpack_action_provider tower_action_provider
-                hsv_detector modular_action_provider baxter_display
+install(TARGETS  flatpack_action_provider tower_action_provider
+                hsv_detector modular_action_provider
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

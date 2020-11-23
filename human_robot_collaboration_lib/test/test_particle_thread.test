@@ -1,3 +1,0 @@
-<launch>
-    <test test-name="test_particle_thread" pkg="human_robot_collaboration_lib" type="test_particle_thread" />
-</launch>
